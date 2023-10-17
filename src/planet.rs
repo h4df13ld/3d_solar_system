@@ -102,14 +102,40 @@ fn add_solar_system_objects(
         }
     )).insert(Name::new("Earth"));
 
+    commands.spawn((
+        SceneBundle {
+            scene: assets.load("mars_2.glb#Scene0"),
+            transform: Transform::from_xyz(0.0, 0.0, 100.0)
+                .with_scale(Vec3::splat(13.0))
+                .with_rotation(Quat::from_rotation_x(EARTH_TILT_DEGREES.to_radians())),
+            ..Default::default()
+        },
+        SolarSystemObjectData {
+            name: "Mars".to_string(),
+            mass_kg: 6.39e23,
+            position_x: 228.6e9,
+            position_y: 0.0,
+            position_z: 0.0,
+            speed_x: 0.0,
+            speed_y: 0.0,
+            speed_z: 24077.0,
+            acceleration_x: 0.02,
+            acceleration_y: 0.0,
+            acceleration_z: 0.0,
+            spin: 0.7,
+            tilt: EARTH_TILT_DEGREES
+        }
+    )).insert(Name::new("Mars"));
+
 
     commands.spawn(PointLightBundle {
         point_light: PointLight {
-            intensity: 1500.0,
+            intensity: 7e6,
+            range: 1e12,
             shadows_enabled: true,
             ..default()
         },
-        transform: Transform::from_xyz(180.0, 0.0, 0.0),
+        transform: Transform::from_xyz(10.0, 0.0, 0.0),
         ..default()
         }).insert(Name::new("Light"));
 
