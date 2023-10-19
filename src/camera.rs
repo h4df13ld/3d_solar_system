@@ -1,25 +1,52 @@
+use std::f32::consts::PI;
+
 use bevy::prelude::*;
+use crate::SolarSystemObjectData;
+
 pub const CAMERA_MOVE_SPEED: f32 = 200.0;
 pub const CAMERA_PAN_SPEED: f32 = 0.5;
 
-pub struct UserCameraPlugin;
+#[derive(Reflect, Component, Default, Debug)]
+#[reflect(Component)]
+pub struct AutomaticCameraParameters {
+    pub back_distance: f32,
+    pub side_distance: f32,
+    pub orbit_angle: f32,
+    pub orbit_speed: f32,
+    pub orbit_distance: f32,
+    pub viewing_height: f32
+}
 
+pub struct UserCameraPlugin;
 impl Plugin for UserCameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(add_camera)
+        app.register_type::<AutomaticCameraParameters>()
+        .add_startup_system(add_camera)
         .add_system(camera_controls)
-        .add_system(camera_pan);
+        .add_system(camera_pan)
+        .add_system(automatic_camera);
     }
 }
 
 // spawn a camera into the system
 fn add_camera(
     mut commands: Commands) {
-    commands.spawn(Camera3dBundle {
-        // transform: Transform::from_xyz(-44.0, 300.0, 0.0).looking_at(Vec3::ZERO, Vec3::Z),
-        transform: Transform::from_xyz(0.0, 0.0, 400.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    }).insert(Name::new("Camera"));
+    commands.spawn((
+        Camera3dBundle {
+            transform: Transform::from_xyz(0.0, 0.0, 400.0).looking_at(Vec3::ZERO, Vec3::Y),
+            ..default()
+        },
+
+        AutomaticCameraParameters{
+            back_distance: 60.0,
+            side_distance: 25.0,
+            orbit_angle: 0.0,
+            orbit_speed: 1.0,
+            orbit_distance: 10.0,
+            viewing_height: 5.0
+        }
+
+    )).insert(Name::new("Camera"));
 }
 
 // create some camera controls
@@ -60,9 +87,6 @@ fn camera_pan(
     time: Res<Time>) {
     
     let mut camera = camera_query.single_mut();
-    let mut rotate_around_z: Quat = Quat::from_rotation_z(0.0);
-
-
     if keyboard.pressed(KeyCode::Up) {
         camera.rotate_local_x(CAMERA_PAN_SPEED * time.delta_seconds());
     }
@@ -81,6 +105,54 @@ fn camera_pan(
 
 } 
 
+fn automatic_camera(
+    mut camera_query: Query<(&mut Transform, &mut AutomaticCameraParameters), With<Camera3d>>,
+    solar_system_object_query: Query<(&Transform, &SolarSystemObjectData), Without<Camera3d>>,
+    time: Res<Time>) {
+
+    const ORBITAL_SPEED_CONSTANT: f32 = 100.0; 
+
+    for (solar_system_object_transform, solar_system_object_data) in &solar_system_object_query {
+        if solar_system_object_data.name == "Earth".to_string() {
+            let planet_coordinates: Vec3 = solar_system_object_transform.translation;
+            // let mut camera = camera_query.single_mut();
+            for (mut camera_transform, mut camera_parameters) in &mut camera_query {
+                // println!("Planet Coords: {}", planet_coordinates);
+
+                // let mut camera = camera_query.single_mut();
+
+                // camera.translation = planet_coordinates;
+                // camera.look_at(Vec3::ZERO, Vec3::Y);
+                
+                // let mut direction_to_move_camera: Vec3 = Vec3::ZERO;
+                // direction_to_move_camera += camera.back();
+                // direction_to_move_camera += camera.right() * (camera_parameters.side_distance / SIDE_DISTANCE_FACTOR);
+
+                // let movement: Vec3 = direction_to_move_camera.normalize_or_zero() * camera_parameters.back_distance;
+                // camera.translation += movement;
+                let orbit_angle: f32 = camera_parameters.orbit_angle;
+                let orbit_distance: f32 = camera_parameters.orbit_distance;
+                let orbit_speed: f32 = camera_parameters.orbit_speed;
+                let viewing_height: f32 = camera_parameters.viewing_height;
+
+                let mut new_orbit_angle: f32 = orbit_angle + 
+                    (time.delta_seconds() * (orbit_speed / ORBITAL_SPEED_CONSTANT));
+                if new_orbit_angle > (2.0 * PI) {
+                    new_orbit_angle = 0.0;
+                }
+                camera_parameters.orbit_angle = new_orbit_angle;
+
+                let orbit_x_distance: f32 = orbit_distance * new_orbit_angle.cos();
+                let orbit_z_distance: f32 = orbit_distance * new_orbit_angle.sin();
+
+                camera_transform.translation.x = planet_coordinates.x + orbit_x_distance; 
+                camera_transform.translation.z = planet_coordinates.z + orbit_z_distance;
+                camera_transform.translation.y = planet_coordinates.y + viewing_height;
+                camera_transform.look_at(planet_coordinates, Vec3::Y); 
+            }
+        }
+    }   
+}
 
 // fn camera_controls(
 //     keyboard: Res<Input<KeyCode>>,

@@ -9,19 +9,19 @@ use bevy::prelude::*;
 #[derive(Reflect, Component, Default, Debug)]
 #[reflect(Component)]
 pub struct SolarSystemObjectData {
-    name: String,
-    mass_kg: f64,
-    position_x: f64,
-    position_y: f64,
-    position_z: f64,
-    speed_x: f64,
-    speed_y: f64,
-    speed_z: f64,
-    acceleration_x: f64,
-    acceleration_y: f64,
-    acceleration_z: f64,
-    spin: f64,
-    tilt: f32
+    pub name: String,
+    pub mass_kg: f64,
+    pub position_x: f64,
+    pub position_y: f64,
+    pub position_z: f64,
+    pub speed_x: f64,
+    pub speed_y: f64,
+    pub speed_z: f64,
+    pub acceleration_x: f64,
+    pub acceleration_y: f64,
+    pub acceleration_z: f64,
+    pub spin: f64,
+    pub tilt: f32
 }
 
 // #[derive(Resource)]
@@ -35,6 +35,8 @@ impl Plugin for SolarSystemObjectPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<SolarSystemObjectData>()
             .add_startup_system(add_solar_system_objects)
+            .add_startup_system(set_planetary_objects_tilt)
+            .add_system(set_planetary_objects_scale)
             .add_system(move_solar_system_objects)
             .add_system(spin_planetary_objects);
             // .add_system(check_solar_object_collision);
@@ -45,9 +47,6 @@ impl Plugin for SolarSystemObjectPlugin {
 fn add_solar_system_objects(
     mut commands: Commands,
     assets: Res<AssetServer>) {
-
-    const EARTH_TILT_DEGREES: f32 = 23.0;
-    // const EARTH_TILT_DEGREES: f32 = 1.2;
 
     commands.spawn((
         SceneBundle {
@@ -76,13 +75,11 @@ fn add_solar_system_objects(
     )).insert(Name::new("Test Sun"));
     
 
-
     commands.spawn((
         SceneBundle {
             scene: assets.load("earth2.glb#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 100.0)
-                .with_scale(Vec3::splat(20.0))
-                .with_rotation(Quat::from_rotation_x(EARTH_TILT_DEGREES.to_radians())),
+                .with_scale(Vec3::splat(20.0)),
             ..Default::default()
         },
         SolarSystemObjectData {
@@ -98,16 +95,16 @@ fn add_solar_system_objects(
             acceleration_y: 0.0,
             acceleration_z: 0.0,
             spin: 1.0,
-            tilt: EARTH_TILT_DEGREES
+            tilt: 23.0
         }
     )).insert(Name::new("Earth"));
+
 
     commands.spawn((
         SceneBundle {
             scene: assets.load("mars_2.glb#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 100.0)
-                .with_scale(Vec3::splat(13.0))
-                .with_rotation(Quat::from_rotation_x(EARTH_TILT_DEGREES.to_radians())),
+                .with_scale(Vec3::splat(13.0)),
             ..Default::default()
         },
         SolarSystemObjectData {
@@ -122,8 +119,8 @@ fn add_solar_system_objects(
             acceleration_x: 0.02,
             acceleration_y: 0.0,
             acceleration_z: 0.0,
-            spin: 0.7,
-            tilt: EARTH_TILT_DEGREES
+            spin: 0.9671,
+            tilt: 25.0
         }
     )).insert(Name::new("Mars"));
 
@@ -135,9 +132,49 @@ fn add_solar_system_objects(
             shadows_enabled: true,
             ..default()
         },
-        transform: Transform::from_xyz(10.0, 0.0, 0.0),
+        transform: Transform::from_xyz(-200.0, 0.0, 0.0),
         ..default()
-        }).insert(Name::new("Light"));
+        }).insert(Name::new("Point Light -x"));
+
+
+    commands.spawn(PointLightBundle {
+        point_light: PointLight {
+            intensity: 7e6,
+            range: 1e12,
+            shadows_enabled: true,
+            ..default()
+        },
+        transform: Transform::from_xyz(200.0, 0.0, 0.0),
+        ..default()
+        }).insert(Name::new("Point Light +x"));
+
+
+    commands.spawn(SpotLightBundle {
+        spot_light: SpotLight {
+            intensity: 7e6,
+            range: 1e12,
+            shadows_enabled: true,
+            outer_angle: 0.07,
+            inner_angle: 0.0,
+            ..default()
+        },
+        transform: Transform::from_xyz(0.0, 0.0, 200.0).looking_at(Vec3::ZERO, Vec3::Y),
+        ..default()
+    }).insert(Name::new("Spot Light +z"));
+    
+
+    commands.spawn(SpotLightBundle {
+        spot_light: SpotLight {
+            intensity: 7e6,
+            range: 1e12,
+            shadows_enabled: true,
+            outer_angle: 0.07,
+            inner_angle: 0.0,
+            ..default()
+        },
+        transform: Transform::from_xyz(0.0, 0.0, -200.0).looking_at(Vec3::ZERO, Vec3::Y),
+        ..default()
+    }).insert(Name::new("Spot Light -z"));
 
     }
 
@@ -255,6 +292,22 @@ fn move_solar_system_objects(
         }
     }
 
+}
+
+fn set_planetary_objects_scale(mut object_query: Query<(&mut Transform, &Handle<Scene>, &SolarSystemObjectData)>,
+                                assets: Res<Assets<Scene>>){
+    for (mut transform, scene_handle, solar_system_object) in &mut object_query {
+        // let model = assets.get(scene_handle).unwrap().;
+
+    }
+}
+
+fn set_planetary_objects_tilt(mut object_query: Query<(&mut Transform, &SolarSystemObjectData)>){
+    for (mut transform, solar_system_object) in &mut object_query {
+        let tilt: f32 = solar_system_object.tilt;
+        transform.rotate_local_z(tilt.to_radians());
+        println!("Tilted")
+    }
 }
 
 fn spin_planetary_objects(mut object_query: Query<(&mut Transform, &SolarSystemObjectData)>,
