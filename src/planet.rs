@@ -49,6 +49,17 @@ fn add_solar_system_objects(
     assets: Res<AssetServer>) {
 
     commands.spawn((
+            SceneBundle {
+                // scene: planetary_assets.sun_scene.clone(),
+                // scene: assets.load("sun.glb#Scene0"),
+                scene: assets.load("galaxy.glb#Scene0"),
+                transform: Transform::from_xyz(10.0, 0.0, 10.0).with_scale(Vec3::splat(1000.0)),
+                ..Default::default()
+                },
+        )).insert(Name::new("Background Galaxy"));
+        
+
+    commands.spawn((
         SceneBundle {
             // scene: planetary_assets.sun_scene.clone(),
             // scene: assets.load("sun.glb#Scene0"),
@@ -123,6 +134,8 @@ fn add_solar_system_objects(
             tilt: 25.0
         }
     )).insert(Name::new("Mars"));
+
+
 
 
     commands.spawn(PointLightBundle {

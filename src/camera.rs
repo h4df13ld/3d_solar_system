@@ -42,7 +42,7 @@ fn add_camera(
             side_distance: 25.0,
             orbit_angle: 0.0,
             orbit_speed: 1.0,
-            orbit_distance: 10.0,
+            orbit_distance: 50.0,
             viewing_height: 5.0
         }
 
@@ -115,21 +115,8 @@ fn automatic_camera(
     for (solar_system_object_transform, solar_system_object_data) in &solar_system_object_query {
         if solar_system_object_data.name == "Earth".to_string() {
             let planet_coordinates: Vec3 = solar_system_object_transform.translation;
-            // let mut camera = camera_query.single_mut();
             for (mut camera_transform, mut camera_parameters) in &mut camera_query {
-                // println!("Planet Coords: {}", planet_coordinates);
 
-                // let mut camera = camera_query.single_mut();
-
-                // camera.translation = planet_coordinates;
-                // camera.look_at(Vec3::ZERO, Vec3::Y);
-                
-                // let mut direction_to_move_camera: Vec3 = Vec3::ZERO;
-                // direction_to_move_camera += camera.back();
-                // direction_to_move_camera += camera.right() * (camera_parameters.side_distance / SIDE_DISTANCE_FACTOR);
-
-                // let movement: Vec3 = direction_to_move_camera.normalize_or_zero() * camera_parameters.back_distance;
-                // camera.translation += movement;
                 let orbit_angle: f32 = camera_parameters.orbit_angle;
                 let orbit_distance: f32 = camera_parameters.orbit_distance;
                 let orbit_speed: f32 = camera_parameters.orbit_speed;
@@ -153,11 +140,3 @@ fn automatic_camera(
         }
     }   
 }
-
-// fn camera_controls(
-//     keyboard: Res<Input<KeyCode>>,
-//     mut camera_query: Query<&mut Transform, With<Camera3d>>,
-//     time: Res<Time>) {
-//     let mut camera = camera_query.single_mut();
-
-// }
