@@ -36,7 +36,7 @@ impl Plugin for SolarSystemObjectPlugin {
         app.register_type::<SolarSystemObjectData>()
             .add_startup_system(add_solar_system_objects)
             .add_startup_system(set_planetary_objects_tilt)
-            .add_system(set_planetary_objects_scale)
+            // .add_system(set_planetary_objects_scale)
             .add_system(move_solar_system_objects)
             .add_system(spin_planetary_objects);
             // .add_system(check_solar_object_collision);
@@ -46,28 +46,27 @@ impl Plugin for SolarSystemObjectPlugin {
 // add all objects to the solar system
 fn add_solar_system_objects(
     mut commands: Commands,
-    assets: Res<AssetServer>) {
-
+    assets: Res<AssetServer>
+) {
+    // ADD BACKGROUND GALAXY
     commands.spawn((
             SceneBundle {
                 // scene: planetary_assets.sun_scene.clone(),
                 // scene: assets.load("sun.glb#Scene0"),
                 scene: assets.load("galaxy.glb#Scene0"),
-                transform: Transform::from_xyz(10.0, 0.0, 10.0).with_scale(Vec3::splat(1000.0)),
-                ..Default::default()
+                transform: Transform::from_xyz(10.0, 0.0, 10.0)
+                    .with_scale(Vec3::splat(3000.0)),
+                ..default()
                 },
         )).insert(Name::new("Background Galaxy"));
         
-
+    // ADD SOLAR SYSTEM OBJECTS 
     commands.spawn((
         SceneBundle {
-            // scene: planetary_assets.sun_scene.clone(),
-            // scene: assets.load("sun.glb#Scene0"),
             scene: assets.load("sun.glb#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            ..Default::default()
+            ..default()
             },
-
         SolarSystemObjectData {
             name: "Sun".to_string(),
             mass_kg: SUN_MASS,
@@ -90,8 +89,8 @@ fn add_solar_system_objects(
         SceneBundle {
             scene: assets.load("earth2.glb#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 100.0)
-                .with_scale(Vec3::splat(20.0)),
-            ..Default::default()
+                .with_scale(Vec3::splat(1.0)),
+            ..default()
         },
         SolarSystemObjectData {
             name: "Earth".to_string(),
@@ -113,10 +112,35 @@ fn add_solar_system_objects(
 
     commands.spawn((
         SceneBundle {
+            scene: assets.load("moon.glb#Scene0"),
+            transform: Transform::from_xyz(0.0, 0.0, 100.0)
+                .with_scale(Vec3::splat(0.05)),
+            ..default()
+        },
+        SolarSystemObjectData {
+            name: "Moon".to_string(),
+            mass_kg: 7.34767e22,
+            position_x: 149.9844e9,
+            position_y: 0.0,
+            position_z: 0.0,
+            speed_x: 0.0,
+            speed_y: 0.0,
+            speed_z: 30780.0,
+            acceleration_x: 0.0002,
+            acceleration_y: 0.0,
+            acceleration_z: 0.0,
+            spin: -0.65,
+            tilt: 10.0
+        }
+    )).insert(Name::new("Moon"));
+
+
+    commands.spawn((
+        SceneBundle {
             scene: assets.load("mars_2.glb#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 100.0)
-                .with_scale(Vec3::splat(13.0)),
-            ..Default::default()
+                .with_scale(Vec3::splat(1.0)),
+            ..default()
         },
         SolarSystemObjectData {
             name: "Mars".to_string(),
@@ -136,8 +160,7 @@ fn add_solar_system_objects(
     )).insert(Name::new("Mars"));
 
 
-
-
+    // LIGHT TO ILLUMINATE SOLAR SYSTEM
     commands.spawn(PointLightBundle {
         point_light: PointLight {
             intensity: 7e6,
@@ -171,7 +194,8 @@ fn add_solar_system_objects(
             inner_angle: 0.0,
             ..default()
         },
-        transform: Transform::from_xyz(0.0, 0.0, 200.0).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_xyz(0.0, 0.0, 200.0)
+            .looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     }).insert(Name::new("Spot Light +z"));
     
@@ -185,11 +209,11 @@ fn add_solar_system_objects(
             inner_angle: 0.0,
             ..default()
         },
-        transform: Transform::from_xyz(0.0, 0.0, -200.0).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_xyz(0.0, 0.0, -200.0)
+            .looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     }).insert(Name::new("Spot Light -z"));
-
-    }
+}
 
 
 
@@ -200,8 +224,8 @@ fn add_solar_system_objects(
 /// split into x, y & z components
 fn move_solar_system_objects(
     mut object_query: Query<(&mut SolarSystemObjectData, &mut Transform)>,
-    time: Res<Time>) {
-    
+    time: Res<Time>
+) {  
     const RADIUS_TO_TRANSLATION_RATIO: f64 = 644444444.0;
 
     // obtain current coordinates and mass of each solar system object
@@ -214,7 +238,6 @@ fn move_solar_system_objects(
         let position_x: f64 = object_data.position_x.clone();
         let position_y: f64 = object_data.position_y.clone();
         let position_z: f64 = object_data.position_z.clone();
-
         all_planatery_objects_data.push((name, mass, position_x, position_y, position_z));
     }
 
@@ -233,53 +256,64 @@ fn move_solar_system_objects(
             other_object_pos_y,
             other_object_pos_z) in &all_planatery_objects_data {
 
-                if object_name.to_string() != other_object_name.to_string() {
-                    // determine x, y and z differences in distance between objects
-                    let diff_x_distance: f64 = 
-                        other_object_pos_x - object_data.position_x.clone();
-                    let diff_y_distance: f64 = 
-                        other_object_pos_y - object_data.position_y.clone();
-                    let diff_z_distance: f64 = 
-                        other_object_pos_z - object_data.position_z.clone();
-
-                    // square the differences
-                    let diff_x_squared: f64 = diff_x_distance.powi(2);
-                    let diff_y_squared: f64 = diff_y_distance.powi(2);
-                    let diff_z_squared: f64 = diff_z_distance.powi(2);
-
-                    // obtain total distance between objects
-                    let distance_between_objects: f64 = (diff_x_squared +
-                        diff_y_squared + diff_z_squared).sqrt();
-
-                    // determine the force between objects
-                    // https://physics.stackexchange.com/questions/17285/split-gravitational-force-into-x-y-and-z-componenets
-                    let force_x: f64 = ((GRAV_CONST * other_object_mass * 
-                        object_data.mass_kg.clone()) / 
-                        (distance_between_objects.powi(3)))
-                        * diff_x_distance;
-                    let force_y: f64 = ((GRAV_CONST * other_object_mass * 
-                        object_data.mass_kg.clone()) / 
-                        (distance_between_objects.powi(3)))
-                        * diff_y_distance;
-                    let force_z: f64 = ((GRAV_CONST * other_object_mass * 
-                        object_data.mass_kg.clone()) / 
-                        (distance_between_objects.powi(3)))
-                        * diff_z_distance;
-
-                    if let Some(object) = total_forces_on_objects.iter_mut().find(|(name, _, _, _)| name == &object_name) {
-                        object.1 += force_x;
-                        object.2 += force_y;
-                        object.3 += force_z;
-                    } else {
-                        println!("No object found with name {}", &object_name);
-                    }
-                    
+                if object_name.to_string() == other_object_name.to_string() {
+                    // DONT COMPARE OBJECT TO ITSELF
+                    continue;
                 }
-        }        
-    }
+                // determine x, y and z differences in distance between objects
+                let diff_x_distance: f64 = 
+                    other_object_pos_x - object_data.position_x.clone();
+                let diff_y_distance: f64 = 
+                    other_object_pos_y - object_data.position_y.clone();
+                let diff_z_distance: f64 = 
+                    other_object_pos_z - object_data.position_z.clone();
 
-    for (mut object_data, mut transform) in &mut object_query {
-        if let Some(object_total_force) = total_forces_on_objects.iter_mut().find(|(name, _, _, _)| name == &object_data.name.clone()) {
+                // square the differences
+                let diff_x_squared: f64 = diff_x_distance.powi(2);
+                let diff_y_squared: f64 = diff_y_distance.powi(2);
+                let diff_z_squared: f64 = diff_z_distance.powi(2);
+
+                // obtain total distance between objects
+                let distance_between_objects: f64 = (diff_x_squared +
+                    diff_y_squared + diff_z_squared).sqrt();
+
+                // determine the force between objects
+                // https://physics.stackexchange.com/questions/17285/split-gravitational-force-into-x-y-and-z-componenets
+                let force_x: f64 = ((GRAV_CONST * other_object_mass * 
+                    object_data.mass_kg.clone()) / 
+                    (distance_between_objects.powi(3)))
+                    * diff_x_distance;
+                let force_y: f64 = ((GRAV_CONST * other_object_mass * 
+                    object_data.mass_kg.clone()) / 
+                    (distance_between_objects.powi(3)))
+                    * diff_y_distance;
+                let force_z: f64 = ((GRAV_CONST * other_object_mass * 
+                    object_data.mass_kg.clone()) / 
+                    (distance_between_objects.powi(3)))
+                    * diff_z_distance;
+
+                if let Some(object) = 
+                    total_forces_on_objects
+                    .iter_mut()
+                    .find(|(name, _, _, _)| name == &object_name
+                ) {
+                    object.1 += force_x;
+                    object.2 += force_y;
+                    object.3 += force_z;
+                } else {
+                    println!("No object found with name {}", &object_name);
+                }        
+            }        
+        }   
+
+    // MATCH OBJECT FORCES IN LIST TO OBJECT, THEN USE FORCES TO UPDATE TRANSLATION
+    for (mut object_data, mut transform) 
+        in &mut object_query {
+        if let Some(object_total_force)
+            = total_forces_on_objects
+            .iter_mut()
+            .find(|(name, _, _, _)| name == &object_data.name.clone()
+        ){
             
             // determine acceleration components (F=ma -> a=F/m)
             object_data.acceleration_x = object_total_force.1 / object_data.mass_kg;            
@@ -287,59 +321,57 @@ fn move_solar_system_objects(
             object_data.acceleration_z = object_total_force.3 / object_data.mass_kg;     
 
             // update object x, y and z speed components
-            object_data.speed_x += 1.0 * object_data.acceleration_x * time.delta_seconds_f64() * SOLAR_SYSTEM_TIME_FACTOR;
-            object_data.speed_y += 1.0 * object_data.acceleration_y * time.delta_seconds_f64() * SOLAR_SYSTEM_TIME_FACTOR;
-            object_data.speed_z += 1.0 * object_data.acceleration_z * time.delta_seconds_f64() * SOLAR_SYSTEM_TIME_FACTOR;
+            object_data.speed_x += 1.0 * object_data.acceleration_x * 
+                time.delta_seconds_f64() * SOLAR_SYSTEM_TIME_FACTOR;
+            object_data.speed_y += 1.0 * object_data.acceleration_y * 
+                time.delta_seconds_f64() * SOLAR_SYSTEM_TIME_FACTOR;
+            object_data.speed_z += 1.0 * object_data.acceleration_z * 
+                time.delta_seconds_f64() * SOLAR_SYSTEM_TIME_FACTOR;
 
             // update object x. y and z position components
-            object_data.position_x += object_data.speed_x * time.delta_seconds_f64() * SOLAR_SYSTEM_TIME_FACTOR;
-            object_data.position_y += object_data.speed_y * time.delta_seconds_f64() * SOLAR_SYSTEM_TIME_FACTOR;
-            object_data.position_z += object_data.speed_z * time.delta_seconds_f64() * SOLAR_SYSTEM_TIME_FACTOR;
+            object_data.position_x += object_data.speed_x * 
+                time.delta_seconds_f64() * SOLAR_SYSTEM_TIME_FACTOR;
+            object_data.position_y += object_data.speed_y * 
+                time.delta_seconds_f64() * SOLAR_SYSTEM_TIME_FACTOR;
+            object_data.position_z += object_data.speed_z * 
+                time.delta_seconds_f64() * SOLAR_SYSTEM_TIME_FACTOR;
 
             // update the translation position of object
-            transform.translation.x = (object_data.position_x / RADIUS_TO_TRANSLATION_RATIO) as f32;
-            transform.translation.y = (object_data.position_y / RADIUS_TO_TRANSLATION_RATIO) as f32;
-            transform.translation.z = (object_data.position_z / RADIUS_TO_TRANSLATION_RATIO) as f32;
+            transform.translation.x = (object_data.position_x / 
+                RADIUS_TO_TRANSLATION_RATIO) as f32;
+            transform.translation.y = (object_data.position_y /
+                RADIUS_TO_TRANSLATION_RATIO) as f32;
+            transform.translation.z = (object_data.position_z / 
+                RADIUS_TO_TRANSLATION_RATIO) as f32;
         } else {
             println!("Failed to update component positions")
         }
     }
-
 }
 
-fn set_planetary_objects_scale(mut object_query: Query<(&mut Transform, &Handle<Scene>, &SolarSystemObjectData)>,
-                                assets: Res<Assets<Scene>>){
-    for (mut transform, scene_handle, solar_system_object) in &mut object_query {
-        // let model = assets.get(scene_handle).unwrap().;
 
-    }
-}
-
-fn set_planetary_objects_tilt(mut object_query: Query<(&mut Transform, &SolarSystemObjectData)>){
-    for (mut transform, solar_system_object) in &mut object_query {
+fn set_planetary_objects_tilt(
+    mut object_query: Query<(&mut Transform, &SolarSystemObjectData)>
+){
+    for (mut transform, solar_system_object)
+    in &mut object_query {
         let tilt: f32 = solar_system_object.tilt;
         transform.rotate_local_z(tilt.to_radians());
         println!("Tilted")
     }
 }
 
-fn spin_planetary_objects(mut object_query: Query<(&mut Transform, &SolarSystemObjectData)>,
-                            time: Res<Time>) {
-    
-    for (mut transform, solar_system_object) in &mut object_query {
-        
+fn spin_planetary_objects(
+    mut object_query: Query<(&mut Transform, &SolarSystemObjectData)>,
+    time: Res<Time>
+){    
+    for (mut transform, solar_system_object) 
+    in &mut object_query {
         let tilt: f32 = solar_system_object.tilt;
-        let tilt_radians: f32 = tilt.to_radians();
-        // transform.rotate(Quat::from_rotation_x(tilt));
-        // if transform.rotation =! Quat::from_rotation_x(tilt) {
-        //     transform.with_rotation(Quat::from_rotation_x(tilt));
-        // }
-        
+        let tilt_radians: f32 = tilt.to_radians();        
         let spin_rate: f32 = solar_system_object.spin as f32;
-        let angle_to_rotate: f32 = (spin_rate * time.delta_seconds() * SOLAR_SYSTEM_SPIN_FACTOR).to_radians();
-        
-
-        // transform.rotate_axis(Vec3::Y, angle_to_rotate);
+        let angle_to_rotate: f32 = (spin_rate * time.delta_seconds() * 
+            SOLAR_SYSTEM_SPIN_FACTOR).to_radians();
         transform.rotate_axis(Vec3 { x: (0.0), y: (1.0), z: (tilt_radians) }, angle_to_rotate);
     }
 }
