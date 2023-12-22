@@ -3,7 +3,23 @@ pub const SUN_MASS: f64 = 1.989e30; //kg
 pub const SOLAR_SYSTEM_TIME_FACTOR: f64 = 100000.0; // used to speed up the solar system
 pub const SOLAR_SYSTEM_SPIN_FACTOR: f32 = 20.0;
 
-use bevy::prelude::*;
+use bevy::{prelude::*, ecs::reflect};
+
+
+// setup planetary object names
+#[derive(Reflect, Component, Default, Debug, PartialEq)]
+#[reflect(Component)]
+pub enum PlanetaryObjectNames {
+    Mercury,
+    Venus,
+    #[default]
+    Earth,
+    Mars,
+    Jupiter,
+    Saturn,
+    Uranus,
+    Neptune
+}
 
 // struct to contain data for a solar system object
 #[derive(Reflect, Component, Default, Debug)]
@@ -21,7 +37,13 @@ pub struct SolarSystemObjectData {
     pub acceleration_y: f64,
     pub acceleration_z: f64,
     pub spin: f64,
-    pub tilt: f32
+    pub tilt: f32,
+}
+
+#[derive(Reflect, Component, Default, Debug)]
+#[reflect(Component)]
+pub struct ObjectName {
+    pub name: PlanetaryObjectNames
 }
 
 // #[derive(Resource)]
@@ -55,12 +77,13 @@ fn add_solar_system_objects(
                 // scene: assets.load("sun.glb#Scene0"),
                 scene: assets.load("galaxy.glb#Scene0"),
                 transform: Transform::from_xyz(10.0, 0.0, 10.0)
-                    .with_scale(Vec3::splat(3000.0)),
+                    .with_scale(Vec3::splat(8000.0)),
                 ..default()
                 },
         )).insert(Name::new("Background Galaxy"));
         
     // ADD SOLAR SYSTEM OBJECTS 
+    // SUN
     commands.spawn((
         SceneBundle {
             scene: assets.load("sun.glb#Scene0"),
@@ -81,13 +104,69 @@ fn add_solar_system_objects(
             acceleration_z: 0.0,
             spin: 0.0,
             tilt: 0.0
-            }
+        }
     )).insert(Name::new("Test Sun"));
     
-
+    // MERCURY
     commands.spawn((
         SceneBundle {
-            scene: assets.load("earth2.glb#Scene0"),
+            scene: assets.load("mercury.glb#Scene0"),
+            transform: Transform::from_xyz(0.0, 0.0, 0.0)
+                .with_scale(Vec3::splat(0.2)),
+            ..default()
+            },
+        SolarSystemObjectData {
+            name: "Mercury".to_string(),
+            mass_kg: 3.285e23,
+            position_x: 5.8e10,
+            position_y: 0.0,
+            position_z: 0.0,
+            speed_x: 0.0,
+            speed_y: 0.0,
+            speed_z: 47841.0,
+            acceleration_x: 0.039,
+            acceleration_y: 0.0,
+            acceleration_z: 0.0,
+            spin: 0.017,
+            tilt: 2.0
+        },
+        ObjectName {
+            name: PlanetaryObjectNames::Mercury
+        }
+    )).insert(Name::new("Mercury"));
+
+    // VENUS
+    commands.spawn((
+        SceneBundle {
+            scene: assets.load("venus.glb#Scene0"),
+            transform: Transform::from_xyz(0.0, 0.0, 0.0)
+                .with_scale(Vec3::splat(0.3)),
+            ..default()
+            },
+        SolarSystemObjectData {
+            name: "Venus".to_string(),
+            mass_kg: 4.867e24,
+            position_x: 108.2e9,
+            position_y: 0.0,
+            position_z: 0.0,
+            speed_x: 0.0,
+            speed_y: 0.0,
+            speed_z: 35020.0,
+            acceleration_x: 0.02,
+            acceleration_y: 0.0,
+            acceleration_z: 0.0,
+            spin: 0.004,
+            tilt: 2.6
+        },
+        ObjectName {
+                name: PlanetaryObjectNames::Venus
+            }
+    )).insert(Name::new("Venus"));
+
+    // EARTH
+    commands.spawn((
+        SceneBundle {
+            scene: assets.load("earth.glb#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 100.0)
                 .with_scale(Vec3::splat(1.0)),
             ..default()
@@ -106,10 +185,13 @@ fn add_solar_system_objects(
             acceleration_z: 0.0,
             spin: 1.0,
             tilt: 23.0
+        },
+        ObjectName {
+            name: PlanetaryObjectNames::Earth
         }
     )).insert(Name::new("Earth"));
 
-
+    // MOON
     commands.spawn((
         SceneBundle {
             scene: assets.load("moon.glb#Scene0"),
@@ -134,10 +216,10 @@ fn add_solar_system_objects(
         }
     )).insert(Name::new("Moon"));
 
-
+    // MARS
     commands.spawn((
         SceneBundle {
-            scene: assets.load("mars_2.glb#Scene0"),
+            scene: assets.load("mars.glb#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 100.0)
                 .with_scale(Vec3::splat(1.0)),
             ..default()
@@ -156,9 +238,124 @@ fn add_solar_system_objects(
             acceleration_z: 0.0,
             spin: 0.9671,
             tilt: 25.0
+        },
+        ObjectName {
+            name: PlanetaryObjectNames::Mars
         }
     )).insert(Name::new("Mars"));
 
+    // JUPITER
+    commands.spawn((
+        SceneBundle {
+            scene: assets.load("jupiter.glb#Scene0"),
+            transform: Transform::from_xyz(0.0, 0.0, 100.0)
+                .with_scale(Vec3::splat(5.0)),
+            ..default()
+        },
+        SolarSystemObjectData {
+            name: "Jupiter".to_string(),
+            mass_kg: 1.898E27,
+            position_x: 778.0e9,
+            position_y: 0.0,
+            position_z: 0.0,
+            speed_x: 0.0,
+            speed_y: 0.0,
+            speed_z: 13070.0,
+            acceleration_x: 0.02,
+            acceleration_y: 0.0,
+            acceleration_z: 0.0,
+            spin: 2.4,
+            tilt: 3.13
+        },
+        ObjectName {
+            name: PlanetaryObjectNames::Jupiter
+        }
+    )).insert(Name::new("Jupiter"));
+
+    // SATURN
+    commands.spawn((
+        SceneBundle {
+            scene: assets.load("saturn.glb#Scene0"),
+            transform: Transform::from_xyz(0.0, 0.0, 100.0)
+                .with_scale(Vec3::splat(3.7)),
+            ..default()
+        },
+        SolarSystemObjectData {
+            name: "Saturn".to_string(),
+            mass_kg: 5.683e26,
+            position_x: 1434.0e9,
+            position_y: 0.0,
+            position_z: 0.0,
+            speed_x: 0.0,
+            speed_y: 0.0,
+            speed_z: 9690.0,
+            acceleration_x: 0.02,
+            acceleration_y: 0.0,
+            acceleration_z: 0.0,
+            spin: 2.24,
+            tilt: 26.73
+        },
+        ObjectName {
+            name: PlanetaryObjectNames::Saturn
+        }
+    )).insert(Name::new("Saturn"));
+
+    // URANUS
+    commands.spawn((
+        SceneBundle {
+            scene: assets.load("uranus.glb#Scene0"),
+            transform: Transform::from_xyz(0.0, 0.0, 100.0)
+                .with_scale(Vec3::splat(2.5)),
+            ..default()
+        },
+        SolarSystemObjectData {
+            name: "Uranus".to_string(),
+            mass_kg: 8.681e25,
+            position_x: 2871.0e9,
+            position_y: 0.0,
+            position_z: 0.0,
+            speed_x: 0.0,
+            speed_y: 0.0,
+            speed_z: 6810.0,
+            acceleration_x: 0.02,
+            acceleration_y: 0.0,
+            acceleration_z: 0.0,
+            spin: 1.41,
+            tilt: 97.77
+        },
+        ObjectName {
+            name: PlanetaryObjectNames::Uranus
+        }
+    )).insert(Name::new("Uranus"));
+
+
+    // NEPTUNE
+    commands.spawn((
+        SceneBundle {
+            scene: assets.load("neptune.glb#Scene0"),
+            transform: Transform::from_xyz(0.0, 0.0, 100.0)
+                .with_scale(Vec3::splat(2.3)),
+            ..default()
+        },
+        SolarSystemObjectData {
+            name: "Neptune".to_string(),
+            mass_kg: 1.024e26,
+            position_x: 4495.0e9,
+            position_y: 0.0,
+            position_z: 0.0,
+            speed_x: 0.0,
+            speed_y: 0.0,
+            speed_z: 5430.0,
+            acceleration_x: 0.02,
+            acceleration_y: 0.0,
+            acceleration_z: 0.0,
+            spin: 1.5,
+            tilt: 46.0
+        },
+        ObjectName {
+            name: PlanetaryObjectNames::Neptune
+        }
+    )).insert(Name::new("Neptune"));
 
     // LIGHT TO ILLUMINATE SOLAR SYSTEM
     commands.spawn(PointLightBundle {
