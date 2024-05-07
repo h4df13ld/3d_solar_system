@@ -23,6 +23,7 @@ impl Default for CurrentPlanetForCamera {
     }
 }
 
+// SETUP AUTOMATIC CAMERA
 #[derive(Reflect, Component, Default, Debug)]
 #[reflect(Component)]
 pub struct AutomaticCameraParameters {
@@ -34,7 +35,7 @@ pub struct AutomaticCameraParameters {
 }
 
 
-// RESOURCE TO CHANGE BETWEEN AUTOMATIC AND MANUAL CAMERA
+// RESOURCE TIMER TO CHANGE BETWEEN AUTOMATIC AND MANUAL CAMERA
 #[derive(Reflect)]
 #[derive(Resource)]
 pub struct CameraViewTimer {
@@ -50,7 +51,7 @@ impl Default for CameraViewTimer {
 }
 
 
-// RESOURCE TO CHANGE PLANET FOCUS FOR AUTOMATIC CAMERA
+// RESOURCE TIMER TO CHANGE PLANET FOCUS FOR AUTOMATIC CAMERA
 #[derive(Reflect)]
 #[derive(Resource)]
 pub struct PlanetCameraChangeTimer {
@@ -101,9 +102,9 @@ fn change_automatic_camera_planet(
             PlanetaryObjectNames::Saturn => PlanetaryObjectNames::Uranus,
             PlanetaryObjectNames::Uranus => PlanetaryObjectNames::Neptune,
             PlanetaryObjectNames::Neptune => PlanetaryObjectNames::Mercury,
-        }
+        };
+        println!("Current Planet: {:?}", current_planet.planet);
     }
-    println!("Current Planet: {:?}", current_planet.planet)
 }
 
 // add a timer to change camera view from auto to manual after a set period of time
@@ -217,6 +218,8 @@ fn automatic_camera(
             if object_name.name != automatic_camera_planet.planet {
                 continue;
             }
+            camera_parameters.orbit_distance = solar_system_object_data.optimal_camera_distance;
+
             let planet_coordinates: Vec3 = solar_system_object_transform.translation;
             let orbit_angle: f32 = camera_parameters.orbit_angle;
             let orbit_distance: f32 = camera_parameters.orbit_distance;

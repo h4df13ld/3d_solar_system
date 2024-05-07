@@ -38,6 +38,7 @@ pub struct SolarSystemObjectData {
     pub acceleration_z: f64,
     pub spin: f64,
     pub tilt: f32,
+    pub optimal_camera_distance: f32
 }
 
 #[derive(Reflect, Component, Default, Debug)]
@@ -103,7 +104,8 @@ fn add_solar_system_objects(
             acceleration_y: 0.0,
             acceleration_z: 0.0,
             spin: 0.0,
-            tilt: 0.0
+            tilt: 0.0,
+            optimal_camera_distance: 0.0
         }
     )).insert(Name::new("Test Sun"));
     
@@ -128,7 +130,8 @@ fn add_solar_system_objects(
             acceleration_y: 0.0,
             acceleration_z: 0.0,
             spin: 0.017,
-            tilt: 2.0
+            tilt: 2.0,
+            optimal_camera_distance: 1.5
         },
         ObjectName {
             name: PlanetaryObjectNames::Mercury
@@ -156,7 +159,8 @@ fn add_solar_system_objects(
             acceleration_y: 0.0,
             acceleration_z: 0.0,
             spin: 0.004,
-            tilt: 2.6
+            tilt: 2.6,
+            optimal_camera_distance: 3.0
         },
         ObjectName {
                 name: PlanetaryObjectNames::Venus
@@ -184,7 +188,8 @@ fn add_solar_system_objects(
             acceleration_y: 0.0,
             acceleration_z: 0.0,
             spin: 1.0,
-            tilt: 23.0
+            tilt: 23.0,
+            optimal_camera_distance: 3.0
         },
         ObjectName {
             name: PlanetaryObjectNames::Earth
@@ -212,7 +217,8 @@ fn add_solar_system_objects(
             acceleration_y: 0.0,
             acceleration_z: 0.0,
             spin: -0.65,
-            tilt: 10.0
+            tilt: 10.0,
+            optimal_camera_distance: 0.0
         }
     )).insert(Name::new("Moon"));
 
@@ -237,7 +243,8 @@ fn add_solar_system_objects(
             acceleration_y: 0.0,
             acceleration_z: 0.0,
             spin: 0.9671,
-            tilt: 25.0
+            tilt: 25.0,
+            optimal_camera_distance: 3.0
         },
         ObjectName {
             name: PlanetaryObjectNames::Mars
@@ -265,7 +272,8 @@ fn add_solar_system_objects(
             acceleration_y: 0.0,
             acceleration_z: 0.0,
             spin: 2.4,
-            tilt: 3.13
+            tilt: 3.13,
+            optimal_camera_distance: 17.0
         },
         ObjectName {
             name: PlanetaryObjectNames::Jupiter
@@ -275,9 +283,9 @@ fn add_solar_system_objects(
     // SATURN
     commands.spawn((
         SceneBundle {
-            scene: assets.load("saturn.glb#Scene0"),
+            scene: assets.load("saturn_2.glb#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 100.0)
-                .with_scale(Vec3::splat(3.7)),
+                .with_scale(Vec3::splat(0.5)),
             ..default()
         },
         SolarSystemObjectData {
@@ -293,7 +301,8 @@ fn add_solar_system_objects(
             acceleration_y: 0.0,
             acceleration_z: 0.0,
             spin: 2.24,
-            tilt: 26.73
+            tilt: 26.73,
+            optimal_camera_distance: 15.0
         },
         ObjectName {
             name: PlanetaryObjectNames::Saturn
@@ -321,7 +330,8 @@ fn add_solar_system_objects(
             acceleration_y: 0.0,
             acceleration_z: 0.0,
             spin: 1.41,
-            tilt: 97.77
+            tilt: 97.77,
+            optimal_camera_distance: 14.0
         },
         ObjectName {
             name: PlanetaryObjectNames::Uranus
@@ -332,9 +342,9 @@ fn add_solar_system_objects(
     // NEPTUNE
     commands.spawn((
         SceneBundle {
-            scene: assets.load("neptune.glb#Scene0"),
+            scene: assets.load("neptune_4.glb#Scene0"),
             transform: Transform::from_xyz(0.0, 0.0, 100.0)
-                .with_scale(Vec3::splat(2.3)),
+                .with_scale(Vec3::splat(1.0)),
             ..default()
         },
         SolarSystemObjectData {
@@ -350,7 +360,8 @@ fn add_solar_system_objects(
             acceleration_y: 0.0,
             acceleration_z: 0.0,
             spin: 1.5,
-            tilt: 46.0
+            tilt: 46.0,
+            optimal_camera_distance: 14.0
         },
         ObjectName {
             name: PlanetaryObjectNames::Neptune

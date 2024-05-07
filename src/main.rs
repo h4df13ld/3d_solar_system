@@ -6,12 +6,21 @@ use std::env;
 pub use camera::*;
 pub use planet::*;
 
+use bevy::app::AppExit;
 use bevy::prelude::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
 
 pub const WIDTH: f32 = 1400.0;
 pub const HEIGHT: f32 = 1000.0;
 
+fn exit_game(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut app_exit_event_writer: EventWriter<AppExit>,
+) {
+    if keyboard_input.just_pressed(KeyCode::Escape) {
+        app_exit_event_writer.send(AppExit);
+    }
+}
 
 fn main() {
     env::set_var("RUST_BACKTRACE", "1");
@@ -31,5 +40,6 @@ fn main() {
         .add_plugin(WorldInspectorPlugin)
         .add_plugin(UserCameraPlugin)
         .add_plugin(SolarSystemObjectPlugin)
+        .add_system(exit_game)
         .run();
 }

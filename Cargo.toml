@@ -16,3 +16,5 @@ opt-level = 3
 [dependencies]
 bevy = {version = "0.9.1", features = ["dynamic", "jpeg"]}
 bevy-inspector-egui = "0.16"
+wgpu = "0.19.4"
+wgpu-hal = "0.19.4"
